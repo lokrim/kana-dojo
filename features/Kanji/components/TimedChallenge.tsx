@@ -2,11 +2,11 @@
 
 import React from 'react';
 import useKanjiStore, {
-  type IKanjiObj
+  type IKanjiObj,
 } from '@/features/Kanji/store/useKanjiStore';
 import useStatsStore from '@/features/Progress/store/useStatsStore';
 import TimedChallenge, {
-  type TimedChallengeConfig
+  type TimedChallengeConfig,
 } from '@/shared/components/TimedChallenge';
 import { Random } from 'random-js';
 
@@ -15,6 +15,9 @@ const random = new Random();
 export default function TimedChallengeKanji() {
   const selectedKanjiObjs = useKanjiStore(state => state.selectedKanjiObjs);
   const selectedKanjiSets = useKanjiStore(state => state.selectedKanjiSets);
+  const selectedGameModeKanji = useKanjiStore(
+    state => state.selectedGameModeKanji
+  );
 
   const {
     timedKanjiCorrectAnswers,
@@ -23,7 +26,7 @@ export default function TimedChallengeKanji() {
     timedKanjiBestStreak,
     incrementTimedKanjiCorrectAnswers,
     incrementTimedKanjiWrongAnswers,
-    resetTimedKanjiStats
+    resetTimedKanjiStats,
   } = useStatsStore();
 
   const config: TimedChallengeConfig<IKanjiObj> = {
@@ -31,6 +34,7 @@ export default function TimedChallengeKanji() {
     dojoLabel: 'Kanji',
     localStorageKey: 'timedKanjiChallengeDuration',
     goalTimerContext: 'Kanji Timed Challenge',
+    initialGameMode: selectedGameModeKanji === 'Type' ? 'Type' : 'Pick',
     items: selectedKanjiObjs,
     selectedSets: selectedKanjiSets,
     generateQuestion: items => items[random.integer(0, items.length - 1)],
@@ -83,8 +87,8 @@ export default function TimedChallengeKanji() {
       bestStreak: timedKanjiBestStreak,
       incrementCorrect: incrementTimedKanjiCorrectAnswers,
       incrementWrong: incrementTimedKanjiWrongAnswers,
-      reset: resetTimedKanjiStats
-    }
+      reset: resetTimedKanjiStats,
+    },
   };
 
   return <TimedChallenge config={config} />;

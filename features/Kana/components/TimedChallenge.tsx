@@ -8,11 +8,14 @@ import type { KanaCharacter } from '@/features/Kana/lib/generateKanaQuestions';
 import { flattenKanaGroups } from '@/features/Kana/lib/flattenKanaGroup';
 import { kana } from '@/features/Kana/data/kana';
 import TimedChallenge, {
-  type TimedChallengeConfig
+  type TimedChallengeConfig,
 } from '@/shared/components/TimedChallenge';
 
 export default function TimedChallengeKana() {
   const kanaGroupIndices = useKanaStore(state => state.kanaGroupIndices);
+  const selectedGameModeKana = useKanaStore(
+    state => state.selectedGameModeKana
+  );
 
   const selectedKana = React.useMemo(
     () => flattenKanaGroups(kanaGroupIndices) as unknown as KanaCharacter[],
@@ -42,7 +45,7 @@ export default function TimedChallengeKana() {
     timedBestStreak,
     incrementTimedCorrectAnswers,
     incrementTimedWrongAnswers,
-    resetTimedStats
+    resetTimedStats,
   } = useStatsStore();
 
   const config: TimedChallengeConfig<KanaCharacter> = {
@@ -50,6 +53,7 @@ export default function TimedChallengeKana() {
     dojoLabel: 'Kana',
     localStorageKey: 'timedChallengeDuration',
     goalTimerContext: 'Kana Timed Challenge',
+    initialGameMode: selectedGameModeKana === 'Type' ? 'Type' : 'Pick',
     items: selectedKana,
     selectedSets: selectedKanaGroups,
     generateQuestion: items => generateKanaQuestion(items),
@@ -100,8 +104,8 @@ export default function TimedChallengeKana() {
       bestStreak: timedBestStreak,
       incrementCorrect: incrementTimedCorrectAnswers,
       incrementWrong: incrementTimedWrongAnswers,
-      reset: resetTimedStats
-    }
+      reset: resetTimedStats,
+    },
   };
 
   return <TimedChallenge config={config} />;

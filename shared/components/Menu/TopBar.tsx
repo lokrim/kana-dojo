@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { Link } from '@/core/i18n/routing';
 import useKanaStore from '@/features/Kana/store/useKanaStore';
 import useKanjiStore from '@/features/Kanji/store/useKanjiStore';
 import useVocabStore from '@/features/Vocabulary/store/useVocabStore';
@@ -23,6 +22,9 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
 
   // Modal state
   const [showGameModesModal, setShowGameModesModal] = useState(false);
+  const [gameModesMode, setGameModesMode] = useState<'train' | 'blitz'>(
+    'train'
+  );
 
   // Kana store
   const kanaGroupIndices = useKanaStore(state => state.kanaGroupIndices);
@@ -37,10 +39,10 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
     currentDojo === 'kana'
       ? kanaGroupIndices.length !== 0
       : currentDojo === 'kanji'
-      ? selectedKanjiObjs.length >= 10
-      : currentDojo === 'vocabulary'
-      ? selectedWordObjs.length >= 10
-      : false;
+        ? selectedKanjiObjs.length >= 10
+        : currentDojo === 'vocabulary'
+          ? selectedWordObjs.length >= 10
+          : false;
 
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -79,7 +81,7 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
   }>({
     bottom: 0,
     left: 0,
-    width: '100%'
+    width: '100%',
   });
 
   const placeholderRef = useRef<HTMLDivElement | null>(null);
@@ -158,7 +160,7 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
       {/* Invisible placeholder to measure parent width/position */}
       <div
         ref={placeholderRef}
-        className='w-full h-0 opacity-0 pointer-events-none'
+        className="w-full h-0 opacity-0 pointer-events-none"
       />
 
       <AnimatePresence>
@@ -177,7 +179,7 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
               width:
                 typeof layout.width === 'number'
                   ? `${layout.width}px`
-                  : layout.width
+                  : layout.width,
             }}
             className={clsx(
               'fixed z-40',
@@ -192,26 +194,26 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
                 'w-full max-w-4xl mx-auto'
               )}
             >
-              {/* Timed Challenge Button */}
+              {/* Blitz Button */}
               {showTimedChallenge && (
-                <Link
-                  href={`/${currentDojo}/blitz`}
-                  className='flex-1 max-w-sm'
+                <button
+                  className={clsx(
+                    'flex-1 max-w-sm h-12 px-2 sm:px-6 flex flex-row justify-center items-center gap-2',
+                    'bg-[var(--secondary-color)] text-[var(--background-color)]',
+                    'rounded-2xl transition-colors duration-200',
+                    'border-b-6 border-[var(--secondary-color-accent)] shadow-sm',
+                    'hover:cursor-pointer'
+                  )}
+                  onClick={e => {
+                    e.currentTarget.blur();
+                    playClick();
+                    setGameModesMode('blitz');
+                    setShowGameModesModal(true);
+                  }}
                 >
-                  <button
-                    className={clsx(
-                      'w-full h-12 px-2 sm:px-6 flex flex-row justify-center items-center gap-2',
-                      'bg-[var(--secondary-color)] text-[var(--background-color)]',
-                      'rounded-2xl transition-colors duration-200',
-                      'border-b-6 border-[var(--secondary-color-accent)] shadow-sm',
-                      'hover:cursor-pointer'
-                    )}
-                    onClick={() => playClick()}
-                  >
-                    <Timer size={20} />
-                    <span className='whitespace-nowrap'>Blitz</span>
-                  </button>
-                </Link>
+                  <Timer size={20} />
+                  <span className="whitespace-nowrap">Blitz</span>
+                </button>
               )}
 
               {/* Start Training Button - Opens Modal */}
@@ -230,11 +232,15 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
                 onClick={e => {
                   e.currentTarget.blur();
                   playClick();
+                  setGameModesMode('train');
                   setShowGameModesModal(true);
                 }}
               >
-                <span className='whitespace-nowrap'>Train</span>
-                <Play className={clsx(isFilled && 'fill-current')} size={20} />
+                <span className="whitespace-nowrap">Train</span>
+                <Play
+                  className={clsx(isFilled && 'fill-current')}
+                  size={20}
+                />
               </button>
             </div>
           </motion.div>
@@ -246,6 +252,7 @@ const TopBar: React.FC<ITopBarProps> = ({ currentDojo }: ITopBarProps) => {
         isOpen={showGameModesModal}
         onClose={() => setShowGameModesModal(false)}
         currentDojo={currentDojo}
+        mode={gameModesMode}
       />
     </>
   );

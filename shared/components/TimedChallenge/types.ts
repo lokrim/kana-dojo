@@ -9,6 +9,9 @@ export interface TimedChallengeConfig<T> {
   localStorageKey: string;
   goalTimerContext: string;
 
+  // Optional: Initial game mode from store (used when autoStart is true)
+  initialGameMode?: BlitzGameMode;
+
   // Data
   items: T[];
   selectedSets?: string[]; // e.g. ["Set 1", "Set 2"] for displaying selected levels
