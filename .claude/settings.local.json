@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd /c dir \"c:\\\\Users\\\\reser\\\\kanadojo\\\\features\\\\PatchNotes\")",
+      "Bash(cmd /c find \"c:\\\\Users\\\\reser\\\\kanadojo\\\\features\" -name \"*Modal*\" -o -name \"*modal*\")",
+      "Bash(cmd /c dir \"c:\\\\Users\\\\reser\\\\kanadojo\\\\shared\\\\components\\\\ui\")",
+      "Bash(cmd /c \"npx shadcn@latest add dialog\")",
+      "Bash(cmd /c \"dir shared\\\\components\\\\ui\\\\dialog.tsx\")",
+      "Bash(cmd /c \"dir /b shared\\\\components\\\\ui\")",
+      "Bash(cmd /c \"npm run check\")",
+      "Bash(cmd /c \"npx tsc --noEmit\")",
+      "Bash(cmd /c \"npm install @radix-ui/react-dialog\")",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)"
+    ]
+  }
+}

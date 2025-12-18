@@ -1,6 +1,5 @@
 'use client';
-import React from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faDiscord,
@@ -14,6 +13,7 @@ import usePreferencesStore from '@/features/Preferences/store/usePreferencesStor
 import useCrazyModeStore from '@/features/CrazyMode/store/useCrazyModeStore';
 import useDecorationsStore from '@/shared/store/useDecorationsStore';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import PatchNotesModal from '@/features/PatchNotes/components/PatchNotesModal';
 
 import { APP_VERSION_DISPLAY } from '@/shared/lib/constants';
 
@@ -58,10 +58,16 @@ const MobileBottomBar = () => {
     state => state.expandDecorations
   );
   const effectiveTheme = isCrazyMode && activeThemeId ? activeThemeId : theme;
+  const [isPatchNotesOpen, setIsPatchNotesOpen] = useState(false);
 
   const handleClick = (url: string) => {
     playClick();
     window.open(url, '_blank', 'noopener');
+  };
+
+  const handleVersionClick = () => {
+    playClick();
+    setIsPatchNotesOpen(true);
   };
 
   const baseIconClasses = clsx(
@@ -154,14 +160,13 @@ const MobileBottomBar = () => {
           return (
             <React.Fragment key={idx}>
               {isVersionItem ? (
-                <Link
-                  href='/patch-notes'
+                <span
                   className='flex gap-1 hover:text-[var(--main-color)] hover:cursor-pointer '
-                  onClick={playClick}
+                  onClick={handleVersionClick}
                 >
                   <item.icon size={16} />
                   {item.text}
-                </Link>
+                </span>
               ) : (
                 content
               )}
@@ -174,6 +179,10 @@ const MobileBottomBar = () => {
           );
         })}
       </div>
+      <PatchNotesModal
+        open={isPatchNotesOpen}
+        onOpenChange={setIsPatchNotesOpen}
+      />
     </div>
   );
 };
