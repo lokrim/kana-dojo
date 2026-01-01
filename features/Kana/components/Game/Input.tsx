@@ -21,16 +21,42 @@ const random = new Random();
 // Get the global adaptive selector for weighted character selection
 const adaptiveSelector = getGlobalAdaptiveSelector();
 
+// Helper function to determine if a kana character is hiragana or katakana
+const isHiragana = (char: string): boolean => {
+  // Hiragana Unicode range: U+3040 to U+309F
+  const code = char.charCodeAt(0);
+  return code >= 0x3040 && code <= 0x309f;
+};
+
+const isKatakana = (char: string): boolean => {
+  // Katakana Unicode range: U+30A0 to U+30FF
+  const code = char.charCodeAt(0);
+  return code >= 0x30a0 && code <= 0x30ff;
+};
+
 interface InputGameProps {
   isHidden: boolean;
   isReverse?: boolean;
 }
 
 const InputGame = ({ isHidden, isReverse = false }: InputGameProps) => {
-  const { score, setScore } = useStatsStore(
+  const {
+    score,
+    setScore,
+    incrementHiraganaCorrect,
+    incrementKatakanaCorrect,
+    recordAnswerTime,
+    incrementWrongStreak,
+    resetWrongStreak
+  } = useStatsStore(
     useShallow(state => ({
       score: state.score,
-      setScore: state.setScore
+      setScore: state.setScore,
+      incrementHiraganaCorrect: state.incrementHiraganaCorrect,
+      incrementKatakanaCorrect: state.incrementKatakanaCorrect,
+      recordAnswerTime: state.recordAnswerTime,
+      incrementWrongStreak: state.incrementWrongStreak,
+      resetWrongStreak: state.resetWrongStreak
     }))
   );
 
@@ -145,7 +171,10 @@ const InputGame = ({ isHidden, isReverse = false }: InputGameProps) => {
 
   const handleCorrectAnswer = () => {
     speedStopwatch.pause();
-    addCorrectAnswerTime(speedStopwatch.totalMilliseconds / 1000);
+    const answerTimeMs = speedStopwatch.totalMilliseconds;
+    addCorrectAnswerTime(answerTimeMs / 1000);
+    // Track answer time for speed achievements (Requirements 6.1-6.5)
+    recordAnswerTime(answerTimeMs);
     speedStopwatch.reset();
     playCorrect();
     addCharacterToHistory(correctChar);
@@ -164,6 +193,14 @@ const InputGame = ({ isHidden, isReverse = false }: InputGameProps) => {
     triggerCrazyMode();
     // Update adaptive weight system - reduces probability of mastered characters
     adaptiveSelector.updateCharacterWeight(correctChar, true);
+    // Track content-specific stats for achievements (Requirements 1.1-1.8)
+    if (isHiragana(correctChar)) {
+      incrementHiraganaCorrect();
+    } else if (isKatakana(correctChar)) {
+      incrementKatakanaCorrect();
+    }
+    // Reset wrong streak on correct answer (Requirement 10.2)
+    resetWrongStreak();
   };
 
   const handleWrongAnswer = () => {
@@ -186,6 +223,8 @@ const InputGame = ({ isHidden, isReverse = false }: InputGameProps) => {
     triggerCrazyMode();
     // Update adaptive weight system - increases probability of difficult characters
     adaptiveSelector.updateCharacterWeight(correctChar, false);
+    // Track wrong streak for achievements (Requirement 10.2)
+    incrementWrongStreak();
   };
 
   const generateNewCharacter = () => {

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CircleCheck, CircleX, CircleArrowRight } from 'lucide-react';
 import { Random } from 'random-js';
 import clsx from 'clsx';
-import { IKanjiObj } from '@/features/Kanji/store/useKanjiStore';
+import useKanjiStore, { IKanjiObj } from '@/features/Kanji/store/useKanjiStore';
 import { useClick, useCorrect, useError } from '@/shared/hooks/useAudio';
 import GameIntel from '@/shared/components/Game/GameIntel';
 import { buttonBorderStyles } from '@/shared/lib/styles';
@@ -34,10 +34,26 @@ const KanjiInputGame = ({
   isHidden,
   isReverse = false
 }: KanjiInputGameProps) => {
-  const { score, setScore } = useStatsStore(
+  // Get the current JLPT level from the Kanji store
+  const selectedKanjiCollection = useKanjiStore(
+    state => state.selectedKanjiCollection
+  );
+
+  const {
+    score,
+    setScore,
+    incrementKanjiCorrect,
+    recordAnswerTime,
+    incrementWrongStreak,
+    resetWrongStreak
+  } = useStatsStore(
     useShallow(state => ({
       score: state.score,
-      setScore: state.setScore
+      setScore: state.setScore,
+      incrementKanjiCorrect: state.incrementKanjiCorrect,
+      recordAnswerTime: state.recordAnswerTime,
+      incrementWrongStreak: state.incrementWrongStreak,
+      resetWrongStreak: state.resetWrongStreak
     }))
   );
 
@@ -81,13 +97,13 @@ const KanjiInputGame = ({
     correctKanjiObj as IKanjiObj
   );
 
-const targetChar = isReverse
-  ? correctKanjiObj?.kanjiChar
-  : [
-      ...(correctKanjiObj?.meanings ?? []),
-      ...(correctKanjiObj?.kunyomi?.map(k => k.split(' ')[0]) ?? []),
-      ...(correctKanjiObj?.onyomi?.map(k => k.split(' ')[0]) ?? []),
-    ];
+  const targetChar = isReverse
+    ? correctKanjiObj?.kanjiChar
+    : [
+        ...(correctKanjiObj?.meanings ?? []),
+        ...(correctKanjiObj?.kunyomi?.map(k => k.split(' ')[0]) ?? []),
+        ...(correctKanjiObj?.onyomi?.map(k => k.split(' ')[0]) ?? [])
+      ];
 
   const [displayAnswerSummary, setDisplayAnswerSummary] = useState(false);
   const [feedback, setFeedback] = useState(<>{'feedback ~'}</>);
@@ -146,7 +162,10 @@ const targetChar = isReverse
 
   const handleCorrectAnswer = (userInput: string) => {
     speedStopwatch.pause();
-    addCorrectAnswerTime(speedStopwatch.totalMilliseconds / 1000);
+    const answerTimeMs = speedStopwatch.totalMilliseconds;
+    addCorrectAnswerTime(answerTimeMs / 1000);
+    // Track answer time for speed achievements (Requirements 6.1-6.5)
+    recordAnswerTime(answerTimeMs);
     speedStopwatch.reset();
     setCurrentKanjiObj(correctKanjiObj as IKanjiObj);
 
@@ -169,6 +188,10 @@ const targetChar = isReverse
     triggerCrazyMode();
     // Update adaptive weight system - reduces probability of mastered characters
     adaptiveSelector.updateCharacterWeight(correctChar, true);
+    // Track content-specific stats for achievements (Requirements 2.1-2.10)
+    incrementKanjiCorrect(selectedKanjiCollection.toUpperCase());
+    // Reset wrong streak on correct answer (Requirement 10.2)
+    resetWrongStreak();
   };
 
   const handleWrongAnswer = () => {
@@ -194,6 +217,8 @@ const targetChar = isReverse
     triggerCrazyMode();
     // Update adaptive weight system - increases probability of difficult characters
     adaptiveSelector.updateCharacterWeight(correctChar, false);
+    // Track wrong streak for achievements (Requirement 10.2)
+    incrementWrongStreak();
   };
 
   const generateNewCharacter = () => {

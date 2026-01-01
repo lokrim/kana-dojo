@@ -32,10 +32,21 @@ const VocabInputGame = ({
   isHidden,
   isReverse = false
 }: VocabInputGameProps) => {
-  const { score, setScore } = useStatsStore(
+  const {
+    score,
+    setScore,
+    incrementVocabularyCorrect,
+    recordAnswerTime,
+    incrementWrongStreak,
+    resetWrongStreak
+  } = useStatsStore(
     useShallow(state => ({
       score: state.score,
-      setScore: state.setScore
+      setScore: state.setScore,
+      incrementVocabularyCorrect: state.incrementVocabularyCorrect,
+      recordAnswerTime: state.recordAnswerTime,
+      incrementWrongStreak: state.incrementWrongStreak,
+      resetWrongStreak: state.resetWrongStreak
     }))
   );
 
@@ -155,7 +166,10 @@ const VocabInputGame = ({
 
   const handleCorrectAnswer = (userInput: string) => {
     speedStopwatch.pause();
-    addCorrectAnswerTime(speedStopwatch.totalMilliseconds / 1000);
+    const answerTimeMs = speedStopwatch.totalMilliseconds;
+    addCorrectAnswerTime(answerTimeMs / 1000);
+    // Track answer time for speed achievements (Requirements 6.1-6.5)
+    recordAnswerTime(answerTimeMs);
     speedStopwatch.reset();
     setCurrentWordObj(correctWordObj as IVocabObj);
 
@@ -178,6 +192,10 @@ const VocabInputGame = ({
     triggerCrazyMode();
     // Update adaptive weight system - reduces probability of mastered words
     adaptiveSelector.updateCharacterWeight(correctChar, true);
+    // Track vocabulary correct for achievements
+    incrementVocabularyCorrect();
+    // Reset wrong streak on correct answer (Requirement 10.2)
+    resetWrongStreak();
   };
 
   const handleWrongAnswer = () => {
@@ -202,6 +220,8 @@ const VocabInputGame = ({
     triggerCrazyMode();
     // Update adaptive weight system - increases probability of difficult words
     adaptiveSelector.updateCharacterWeight(correctChar, false);
+    // Track wrong streak for achievements (Requirement 10.2)
+    incrementWrongStreak();
   };
 
   const generateNewCharacter = () => {

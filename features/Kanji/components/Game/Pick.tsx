@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { CircleCheck, CircleX } from 'lucide-react';
 import { Random } from 'random-js';
-import { IKanjiObj } from '@/features/Kanji/store/useKanjiStore';
+import useKanjiStore, { IKanjiObj } from '@/features/Kanji/store/useKanjiStore';
 import { useCorrect, useError } from '@/shared/hooks/useAudio';
 import { buttonBorderStyles } from '@/shared/lib/styles';
 import GameIntel from '@/shared/components/Game/GameIntel';
@@ -105,12 +105,25 @@ interface KanjiPickGameProps {
 const KanjiPickGame = ({ selectedKanjiObjs, isHidden }: KanjiPickGameProps) => {
   const { isReverse, decideNextMode, recordWrongAnswer } =
     useSmartReverseMode();
-  const { score, setScore } = useStatsStore(
-    useShallow(state => ({
-      score: state.score,
-      setScore: state.setScore
-    }))
+
+  // Get the current JLPT level from the Kanji store
+  const selectedKanjiCollection = useKanjiStore(
+    state => state.selectedKanjiCollection
   );
+
+  const { score, setScore, incrementKanjiCorrect, recordAnswerTime, incrementWrongStreak, resetWrongStreak } =
+    useStatsStore(
+      useShallow(state => ({
+        score: state.score,
+        setScore: state.setScore,
+        incrementKanjiCorrect: state.incrementKanjiCorrect,
+        recordAnswerTime: state.recordAnswerTime,
+        incrementWrongStreak: state.incrementWrongStreak,
+        resetWrongStreak: state.resetWrongStreak
+      }))
+    );
+      }))
+    );
 
   const speedStopwatch = useStopwatch({ autoStart: false });
 
@@ -252,7 +265,10 @@ const KanjiPickGame = ({ selectedKanjiObjs, isHidden }: KanjiPickGameProps) => {
 
   const handleCorrectAnswer = () => {
     speedStopwatch.pause();
-    addCorrectAnswerTime(speedStopwatch.totalMilliseconds / 1000);
+    const answerTimeMs = speedStopwatch.totalMilliseconds;
+    addCorrectAnswerTime(answerTimeMs / 1000);
+    // Track answer time for speed achievements (Requirements 6.1-6.5)
+    recordAnswerTime(answerTimeMs);
     speedStopwatch.reset();
     playCorrect();
     setCurrentKanjiObj(correctKanjiObj as IKanjiObj);
@@ -267,6 +283,10 @@ const KanjiPickGame = ({ selectedKanjiObjs, isHidden }: KanjiPickGameProps) => {
     adaptiveSelector.updateCharacterWeight(correctChar, true);
     // Smart algorithm decides next mode based on performance
     decideNextMode();
+    // Track content-specific stats for achievements (Requirements 2.1-2.10)
+    incrementKanjiCorrect(selectedKanjiCollection.toUpperCase());
+    // Reset wrong streak on correct answer (Requirement 10.2)
+    resetWrongStreak();
   };
 
   const handleWrongAnswer = (selectedOption: string) => {
@@ -284,6 +304,8 @@ const KanjiPickGame = ({ selectedKanjiObjs, isHidden }: KanjiPickGameProps) => {
     adaptiveSelector.updateCharacterWeight(correctChar, false);
     // Reset consecutive streak without changing mode (avoids rerolling the question)
     recordWrongAnswer();
+    // Track wrong streak for achievements (Requirement 10.2)
+    incrementWrongStreak();
   };
 
   const generateNewCharacter = () => {

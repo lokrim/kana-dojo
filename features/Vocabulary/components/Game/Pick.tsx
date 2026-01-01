@@ -113,10 +113,21 @@ const VocabPickGame = ({ selectedWordObjs, isHidden }: VocabPickGameProps) => {
   const hasWords = !!selectedWordObjs && selectedWordObjs.length > 0;
   const { isReverse, decideNextMode, recordWrongAnswer } =
     useSmartReverseMode();
-  const { score, setScore } = useStatsStore(
+  const {
+    score,
+    setScore,
+    incrementVocabularyCorrect,
+    recordAnswerTime,
+    incrementWrongStreak,
+    resetWrongStreak
+  } = useStatsStore(
     useShallow(state => ({
       score: state.score,
-      setScore: state.setScore
+      setScore: state.setScore,
+      incrementVocabularyCorrect: state.incrementVocabularyCorrect,
+      recordAnswerTime: state.recordAnswerTime,
+      incrementWrongStreak: state.incrementWrongStreak,
+      resetWrongStreak: state.resetWrongStreak
     }))
   );
 
@@ -264,7 +275,10 @@ const VocabPickGame = ({ selectedWordObjs, isHidden }: VocabPickGameProps) => {
 
   const handleCorrectAnswer = () => {
     speedStopwatch.pause();
-    addCorrectAnswerTime(speedStopwatch.totalMilliseconds / 1000);
+    const answerTimeMs = speedStopwatch.totalMilliseconds;
+    addCorrectAnswerTime(answerTimeMs / 1000);
+    // Track answer time for speed achievements (Requirements 6.1-6.5)
+    recordAnswerTime(answerTimeMs);
     speedStopwatch.reset();
     playCorrect();
     addCharacterToHistory(correctChar);
@@ -277,6 +291,10 @@ const VocabPickGame = ({ selectedWordObjs, isHidden }: VocabPickGameProps) => {
     adaptiveSelector.updateCharacterWeight(correctChar, true);
     // Smart algorithm decides next mode based on performance
     decideNextMode();
+    // Track vocabulary correct for achievements
+    incrementVocabularyCorrect();
+    // Reset wrong streak on correct answer (Requirement 10.2)
+    resetWrongStreak();
   };
 
   const handleWrongAnswer = (selectedOption: string) => {
@@ -294,6 +312,8 @@ const VocabPickGame = ({ selectedWordObjs, isHidden }: VocabPickGameProps) => {
     adaptiveSelector.updateCharacterWeight(correctChar, false);
     // Reset consecutive streak without changing mode (avoids rerolling the question)
     recordWrongAnswer();
+    // Track wrong streak for achievements (Requirement 10.2)
+    incrementWrongStreak();
   };
 
   const generateNewCharacter = () => {

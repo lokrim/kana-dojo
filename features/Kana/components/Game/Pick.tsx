@@ -24,6 +24,19 @@ const random = new Random();
 // Get the global adaptive selector for weighted character selection
 const adaptiveSelector = getGlobalAdaptiveSelector();
 
+// Helper function to determine if a kana character is hiragana or katakana
+const isHiragana = (char: string): boolean => {
+  // Hiragana Unicode range: U+3040 to U+309F
+  const code = char.charCodeAt(0);
+  return code >= 0x3040 && code <= 0x309f;
+};
+
+const isKatakana = (char: string): boolean => {
+  // Katakana Unicode range: U+30A0 to U+30FF
+  const code = char.charCodeAt(0);
+  return code >= 0x30a0 && code <= 0x30ff;
+};
+
 // Memoized option button component to prevent unnecessary re-renders
 interface OptionButtonProps {
   variantChar: string;
@@ -88,10 +101,23 @@ const PickGame = ({ isHidden }: PickGameProps) => {
     wrongsToDecrease: 2
   });
 
-  const { score, setScore } = useStatsStore(
+  const {
+    score,
+    setScore,
+    incrementHiraganaCorrect,
+    incrementKatakanaCorrect,
+    recordAnswerTime,
+    incrementWrongStreak,
+    resetWrongStreak
+  } = useStatsStore(
     useShallow(state => ({
       score: state.score,
-      setScore: state.setScore
+      setScore: state.setScore,
+      incrementHiraganaCorrect: state.incrementHiraganaCorrect,
+      incrementKatakanaCorrect: state.incrementKatakanaCorrect,
+      recordAnswerTime: state.recordAnswerTime,
+      incrementWrongStreak: state.incrementWrongStreak,
+      resetWrongStreak: state.resetWrongStreak
     }))
   );
 
@@ -286,7 +312,10 @@ const PickGame = ({ isHidden }: PickGameProps) => {
   const handleCorrectAnswer = useCallback(
     (correctChar: string) => {
       speedStopwatch.pause();
-      addCorrectAnswerTime(speedStopwatch.totalMilliseconds / 1000);
+      const answerTimeMs = speedStopwatch.totalMilliseconds;
+      addCorrectAnswerTime(answerTimeMs / 1000);
+      // Track answer time for speed achievements (Requirements 6.1-6.5)
+      recordAnswerTime(answerTimeMs);
       speedStopwatch.reset();
       playCorrect();
       addCharacterToHistory(correctChar);
@@ -301,6 +330,14 @@ const PickGame = ({ isHidden }: PickGameProps) => {
       decideNextMode();
       // Progressive difficulty - track correct answer
       recordDifficultyCorrect();
+      // Track content-specific stats for achievements (Requirements 1.1-1.8)
+      if (isHiragana(correctChar)) {
+        incrementHiraganaCorrect();
+      } else if (isKatakana(correctChar)) {
+        incrementKatakanaCorrect();
+      }
+      // Reset wrong streak on correct answer (Requirement 10.2)
+      resetWrongStreak();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -313,7 +350,11 @@ const PickGame = ({ isHidden }: PickGameProps) => {
       setScore,
       triggerCrazyMode,
       decideNextMode,
-      recordDifficultyCorrect
+      recordDifficultyCorrect,
+      incrementHiraganaCorrect,
+      incrementKatakanaCorrect,
+      recordAnswerTime,
+      resetWrongStreak
       // speedStopwatch, adaptiveSelector intentionally excluded
     ]
   );
@@ -339,6 +380,8 @@ const PickGame = ({ isHidden }: PickGameProps) => {
       recordWrongAnswer();
       // Progressive difficulty - track wrong answer
       recordDifficultyWrong();
+      // Track wrong streak for achievements (Requirement 10.2)
+      incrementWrongStreak();
     },
     [
       wrongSelectedAnswers,
@@ -352,7 +395,8 @@ const PickGame = ({ isHidden }: PickGameProps) => {
       setScore,
       triggerCrazyMode,
       recordWrongAnswer,
-      recordDifficultyWrong
+      recordDifficultyWrong,
+      incrementWrongStreak
     ]
   );
 

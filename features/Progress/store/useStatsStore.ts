@@ -8,13 +8,75 @@ interface CharacterScore {
   accuracy: number;
 }
 
+// Gauntlet-specific stats (Requirements 4.1-4.10)
+interface GauntletStats {
+  totalRuns: number;
+  completedRuns: number;
+  normalCompleted: number;
+  hardCompleted: number;
+  instantDeathCompleted: number;
+  perfectRuns: number;
+  noDeathRuns: number;
+  livesRegenerated: number;
+  bestStreak: number;
+}
+
+// Blitz-specific stats (Requirements 5.1-5.8)
+interface BlitzStats {
+  totalSessions: number;
+  bestSessionScore: number;
+  bestStreak: number;
+  totalCorrect: number;
+}
+
 interface AllTimeStats {
   totalSessions: number;
   totalCorrect: number;
   totalIncorrect: number;
   bestStreak: number;
   characterMastery: Record<string, { correct: number; incorrect: number }>;
+  // Content-specific tracking (Requirements 1.1-1.8, 2.1-2.10, 3.1-3.6)
+  hiraganaCorrect: number;
+  katakanaCorrect: number;
+  kanjiCorrectByLevel: Record<string, number>; // e.g., { N5: 100, N4: 50 }
+  vocabularyCorrect: number;
+  // Gauntlet-specific tracking (Requirements 4.1-4.10)
+  gauntletStats: GauntletStats;
+  // Blitz-specific tracking (Requirements 5.1-5.8)
+  blitzStats: BlitzStats;
+  // Time and speed tracking (Requirements 6.1-6.5)
+  fastestAnswerMs: number;
+  answerTimesMs: number[];
+  // Variety and exploration tracking (Requirements 8.1-8.3)
+  dojosUsed: string[];
+  modesUsed: string[];
+  challengeModesUsed: string[];
+  // Day tracking (Requirements 8.4-8.7)
+  trainingDays: string[]; // ISO date strings
+  // Wrong streak tracking (Requirement 10.2)
+  currentWrongStreak: number;
+  maxWrongStreak: number;
 }
+
+// Default values for new stats
+const defaultGauntletStats: GauntletStats = {
+  totalRuns: 0,
+  completedRuns: 0,
+  normalCompleted: 0,
+  hardCompleted: 0,
+  instantDeathCompleted: 0,
+  perfectRuns: 0,
+  noDeathRuns: 0,
+  livesRegenerated: 0,
+  bestStreak: 0
+};
+
+const defaultBlitzStats: BlitzStats = {
+  totalSessions: 0,
+  bestSessionScore: 0,
+  bestStreak: 0,
+  totalCorrect: 0
+};
 
 interface IStatsState {
   // Core game stats
@@ -83,6 +145,44 @@ interface IStatsState {
   saveSession: () => void;
   clearAllProgress: () => void;
   resetStats: () => void;
+
+  // Content-specific tracking actions (Requirements 1.1-1.8, 2.1-2.10, 3.1-3.6)
+  incrementHiraganaCorrect: () => void;
+  incrementKatakanaCorrect: () => void;
+  incrementKanjiCorrect: (jlptLevel: string) => void;
+  incrementVocabularyCorrect: () => void;
+
+  // Gauntlet-specific tracking actions (Requirements 4.1-4.10)
+  recordGauntletRun: (params: {
+    completed: boolean;
+    difficulty: 'normal' | 'hard' | 'instant-death';
+    isPerfect: boolean;
+    livesLost: number;
+    livesRegenerated: number;
+    bestStreak: number;
+  }) => void;
+
+  // Blitz-specific tracking actions (Requirements 5.1-5.8)
+  recordBlitzSession: (params: {
+    score: number;
+    streak: number;
+    correctAnswers: number;
+  }) => void;
+
+  // Time and speed tracking actions (Requirements 6.1-6.5)
+  recordAnswerTime: (timeMs: number) => void;
+
+  // Variety and exploration tracking actions (Requirements 8.1-8.3)
+  recordDojoUsed: (dojo: string) => void;
+  recordModeUsed: (mode: string) => void;
+  recordChallengeModeUsed: (challengeMode: string) => void;
+
+  // Day tracking actions (Requirements 8.4-8.7)
+  recordTrainingDay: () => void;
+
+  // Wrong streak tracking actions (Requirement 10.2)
+  incrementWrongStreak: () => void;
+  resetWrongStreak: () => void;
 }
 
 // Helper for timed stats increment correct
@@ -153,8 +253,15 @@ const useStatsStore = create<IStatsState>()(
       characterScores: {},
       incrementCharacterScore: (character, field) =>
         set(s => {
-          const currentScore = s.characterScores[character] || { correct: 0, wrong: 0, accuracy: 0 };
-          const updatedScore = { ...currentScore, [field]: currentScore[field] + 1 };
+          const currentScore = s.characterScores[character] || {
+            correct: 0,
+            wrong: 0,
+            accuracy: 0
+          };
+          const updatedScore = {
+            ...currentScore,
+            [field]: currentScore[field] + 1
+          };
           const { correct, wrong } = updatedScore;
           updatedScore.accuracy = correct / (correct + wrong);
           return {
@@ -259,7 +366,28 @@ const useStatsStore = create<IStatsState>()(
         totalCorrect: 0,
         totalIncorrect: 0,
         bestStreak: 0,
-        characterMastery: {}
+        characterMastery: {},
+        // Content-specific tracking
+        hiraganaCorrect: 0,
+        katakanaCorrect: 0,
+        kanjiCorrectByLevel: {},
+        vocabularyCorrect: 0,
+        // Gauntlet-specific tracking
+        gauntletStats: { ...defaultGauntletStats },
+        // Blitz-specific tracking
+        blitzStats: { ...defaultBlitzStats },
+        // Time and speed tracking
+        fastestAnswerMs: Infinity,
+        answerTimesMs: [],
+        // Variety and exploration tracking
+        dojosUsed: [],
+        modesUsed: [],
+        challengeModesUsed: [],
+        // Day tracking
+        trainingDays: [],
+        // Wrong streak tracking
+        currentWrongStreak: 0,
+        maxWrongStreak: 0
       },
 
       saveSession: () => {
@@ -274,16 +402,21 @@ const useStatsStore = create<IStatsState>()(
             mastery[char].incorrect += scores.wrong;
           });
 
+          // Track training day (Requirements 8.4-8.7)
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+          const trainingDays = s.allTimeStats.trainingDays.includes(today)
+            ? s.allTimeStats.trainingDays
+            : [...s.allTimeStats.trainingDays, today];
+
           return {
             allTimeStats: {
+              ...s.allTimeStats,
               totalSessions: s.allTimeStats.totalSessions + 1,
               totalCorrect: s.allTimeStats.totalCorrect + s.numCorrectAnswers,
               totalIncorrect: s.allTimeStats.totalIncorrect + s.numWrongAnswers,
-              bestStreak: Math.max(
-                s.allTimeStats.bestStreak,
-                s.numCorrectAnswers
-              ),
-              characterMastery: mastery
+              bestStreak: Math.max(s.allTimeStats.bestStreak, s.currentStreak),
+              characterMastery: mastery,
+              trainingDays
             }
           };
         });
@@ -307,7 +440,28 @@ const useStatsStore = create<IStatsState>()(
             totalCorrect: 0,
             totalIncorrect: 0,
             bestStreak: 0,
-            characterMastery: {}
+            characterMastery: {},
+            // Content-specific tracking
+            hiraganaCorrect: 0,
+            katakanaCorrect: 0,
+            kanjiCorrectByLevel: {},
+            vocabularyCorrect: 0,
+            // Gauntlet-specific tracking
+            gauntletStats: { ...defaultGauntletStats },
+            // Blitz-specific tracking
+            blitzStats: { ...defaultBlitzStats },
+            // Time and speed tracking
+            fastestAnswerMs: Infinity,
+            answerTimesMs: [],
+            // Variety and exploration tracking
+            dojosUsed: [],
+            modesUsed: [],
+            challengeModesUsed: [],
+            // Day tracking
+            trainingDays: [],
+            // Wrong streak tracking
+            currentWrongStreak: 0,
+            maxWrongStreak: 0
           }
         }),
 
@@ -323,7 +477,209 @@ const useStatsStore = create<IStatsState>()(
           score: 0,
           stars: 0,
           iconIndices: []
-        })
+        }),
+
+      // Content-specific tracking actions (Requirements 1.1-1.8, 2.1-2.10, 3.1-3.6)
+      incrementHiraganaCorrect: () =>
+        set(s => ({
+          allTimeStats: {
+            ...s.allTimeStats,
+            hiraganaCorrect: s.allTimeStats.hiraganaCorrect + 1
+          }
+        })),
+
+      incrementKatakanaCorrect: () =>
+        set(s => ({
+          allTimeStats: {
+            ...s.allTimeStats,
+            katakanaCorrect: s.allTimeStats.katakanaCorrect + 1
+          }
+        })),
+
+      incrementKanjiCorrect: (jlptLevel: string) =>
+        set(s => ({
+          allTimeStats: {
+            ...s.allTimeStats,
+            kanjiCorrectByLevel: {
+              ...s.allTimeStats.kanjiCorrectByLevel,
+              [jlptLevel]:
+                (s.allTimeStats.kanjiCorrectByLevel[jlptLevel] || 0) + 1
+            }
+          }
+        })),
+
+      incrementVocabularyCorrect: () =>
+        set(s => ({
+          allTimeStats: {
+            ...s.allTimeStats,
+            vocabularyCorrect: s.allTimeStats.vocabularyCorrect + 1
+          }
+        })),
+
+      // Gauntlet-specific tracking actions (Requirements 4.1-4.10)
+      recordGauntletRun: ({
+        completed,
+        difficulty,
+        isPerfect,
+        livesLost,
+        livesRegenerated,
+        bestStreak
+      }) =>
+        set(s => {
+          const gauntletStats = { ...s.allTimeStats.gauntletStats };
+          gauntletStats.totalRuns += 1;
+
+          if (completed) {
+            gauntletStats.completedRuns += 1;
+
+            // Track difficulty-specific completions
+            if (difficulty === 'normal') {
+              gauntletStats.normalCompleted += 1;
+            } else if (difficulty === 'hard') {
+              gauntletStats.hardCompleted += 1;
+            } else if (difficulty === 'instant-death') {
+              gauntletStats.instantDeathCompleted += 1;
+            }
+
+            // Track perfect runs (100% accuracy)
+            if (isPerfect) {
+              gauntletStats.perfectRuns += 1;
+            }
+
+            // Track no-death runs
+            if (livesLost === 0) {
+              gauntletStats.noDeathRuns += 1;
+            }
+          }
+
+          // Track lives regenerated
+          gauntletStats.livesRegenerated += livesRegenerated;
+
+          // Track best streak
+          gauntletStats.bestStreak = Math.max(
+            gauntletStats.bestStreak,
+            bestStreak
+          );
+
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              gauntletStats
+            }
+          };
+        }),
+
+      // Blitz-specific tracking actions (Requirements 5.1-5.8)
+      recordBlitzSession: ({ score, streak, correctAnswers }) =>
+        set(s => {
+          const blitzStats = { ...s.allTimeStats.blitzStats };
+          blitzStats.totalSessions += 1;
+          blitzStats.bestSessionScore = Math.max(
+            blitzStats.bestSessionScore,
+            score
+          );
+          blitzStats.bestStreak = Math.max(blitzStats.bestStreak, streak);
+          blitzStats.totalCorrect += correctAnswers;
+
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              blitzStats
+            }
+          };
+        }),
+
+      // Time and speed tracking actions (Requirements 6.1-6.5)
+      recordAnswerTime: (timeMs: number) =>
+        set(s => ({
+          allTimeStats: {
+            ...s.allTimeStats,
+            fastestAnswerMs: Math.min(s.allTimeStats.fastestAnswerMs, timeMs),
+            answerTimesMs: [...s.allTimeStats.answerTimesMs, timeMs]
+          }
+        })),
+
+      // Variety and exploration tracking actions (Requirements 8.1-8.3)
+      recordDojoUsed: (dojo: string) =>
+        set(s => {
+          if (s.allTimeStats.dojosUsed.includes(dojo)) {
+            return s; // Already recorded
+          }
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              dojosUsed: [...s.allTimeStats.dojosUsed, dojo]
+            }
+          };
+        }),
+
+      recordModeUsed: (mode: string) =>
+        set(s => {
+          if (s.allTimeStats.modesUsed.includes(mode)) {
+            return s; // Already recorded
+          }
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              modesUsed: [...s.allTimeStats.modesUsed, mode]
+            }
+          };
+        }),
+
+      recordChallengeModeUsed: (challengeMode: string) =>
+        set(s => {
+          if (s.allTimeStats.challengeModesUsed.includes(challengeMode)) {
+            return s; // Already recorded
+          }
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              challengeModesUsed: [
+                ...s.allTimeStats.challengeModesUsed,
+                challengeMode
+              ]
+            }
+          };
+        }),
+
+      // Day tracking actions (Requirements 8.4-8.7)
+      recordTrainingDay: () =>
+        set(s => {
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+          if (s.allTimeStats.trainingDays.includes(today)) {
+            return s; // Already recorded today
+          }
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              trainingDays: [...s.allTimeStats.trainingDays, today]
+            }
+          };
+        }),
+
+      // Wrong streak tracking actions (Requirement 10.2)
+      incrementWrongStreak: () =>
+        set(s => {
+          const newWrongStreak = s.allTimeStats.currentWrongStreak + 1;
+          return {
+            allTimeStats: {
+              ...s.allTimeStats,
+              currentWrongStreak: newWrongStreak,
+              maxWrongStreak: Math.max(
+                s.allTimeStats.maxWrongStreak,
+                newWrongStreak
+              )
+            }
+          };
+        }),
+
+      resetWrongStreak: () =>
+        set(s => ({
+          allTimeStats: {
+            ...s.allTimeStats,
+            currentWrongStreak: 0
+          }
+        }))
     }),
     {
       name: 'kanadojo-stats',
