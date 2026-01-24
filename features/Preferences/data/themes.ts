@@ -329,6 +329,10 @@ const baseThemeSets: BaseThemeGroup[] = [
     isLight: false,
     themes: [
       {
+        id: 'festival-yatai',
+        backgroundColor: 'oklch(19.0% 0.030 35.0 / 1)',
+        mainColor: 'oklch(78.0% 0.185 45.0 / 1)',
+        secondaryColor: 'oklch(88.0% 0.115 95.0 / 1)'},{
         id: 'mountain-cedar',
         backgroundColor: 'oklch(20.0% 0.020 150.0 / 1)',
         mainColor: 'oklch(70.0% 0.105 145.0 / 1)',
