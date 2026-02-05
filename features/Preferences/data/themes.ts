@@ -190,6 +190,10 @@ export function getThemeDefaultWallpaperId(
     'sakura-night': 'sakura-night',
     'mt-fuji-sunset': 'mt-fuji-sunset',
     'purple-gradient': 'minimal-gradient-purple',
+    'kyoto-lanterns': 'kyoto-lanterns',
+    'arashiyama-bamboo': 'arashiyama-bamboo',
+    'nara-temple': 'nara-temple',
+    'osaka-riverwalk': 'osaka-riverwalk',
   };
   return themeWallpaperMap[themeId];
 }
@@ -360,6 +364,34 @@ const baseThemeSets: BaseThemeGroup[] = [
         mainColor: 'oklch(100% 0 0)',
         secondaryColor: 'oklch(90% 0 0)',
         wallpaperId: 'minimal-gradient-purple',
+      },
+      {
+        id: 'kyoto-lanterns',
+        backgroundColor: 'oklch(0% 0 0 / 0.95)',
+        mainColor: 'oklch(74% 0.25 32 / 1)',
+        secondaryColor: 'oklch(68% 0.18 22 / 1)',
+        wallpaperId: 'kyoto-lanterns',
+      },
+      {
+        id: 'arashiyama-bamboo',
+        backgroundColor: 'oklch(0% 0 0 / 0.95)',
+        mainColor: 'oklch(72% 0.14 140 / 1)',
+        secondaryColor: 'oklch(78% 0.1 115 / 1)',
+        wallpaperId: 'arashiyama-bamboo',
+      },
+      {
+        id: 'nara-temple',
+        backgroundColor: 'oklch(0% 0 0 / 0.95)',
+        mainColor: 'oklch(80% 0.12 70 / 1)',
+        secondaryColor: 'oklch(70% 0.17 45 / 1)',
+        wallpaperId: 'nara-temple',
+      },
+      {
+        id: 'osaka-riverwalk',
+        backgroundColor: 'oklch(0% 0 0 / 0.95)',
+        mainColor: 'oklch(68% 0.21 260 / 1)',
+        secondaryColor: 'oklch(70% 0.18 295 / 1)',
+        wallpaperId: 'osaka-riverwalk',
       },
     ],
   },
