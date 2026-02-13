@@ -245,7 +245,9 @@
     "mainColor": "oklch(80.0% 0.210 180.0 / 1)",
     "secondaryColor": "oklch(85.0% 0.190 320.0 / 1)",
     "issued": true,
-    "completed": false
+    "completed": true,
+    "completedBy": "nchhillar2004",
+    "completedPR": 4736
   },
   {
     "id": "ocean-tofu",
