@@ -743,7 +743,9 @@
     "mainColor": "oklch(90.0% 0.075 225.0 / 1)",
     "secondaryColor": "oklch(80.0% 0.055 235.0 / 1)",
     "issued": false,
-    "completed": false
+    "completed": true,
+    "completedBy": "Godson-Ozioma",
+    "completedPR": 5020
   },
   {
     "id": "sushi-counter",
