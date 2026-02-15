@@ -339,7 +339,7 @@
     "mainColor": "oklch(85.0% 0.155 90.0 / 1)",
     "secondaryColor": "oklch(70.0% 0.120 95.0 / 1)",
     "issued": false,
-    "completed": false,
+    "completed": true,
     "completedBy": "Cima9642",
     "completedPR": 4794
   },
@@ -350,7 +350,7 @@
     "backgroundColor": "oklch(14.0% 0.025 280.0 / 1)",
     "mainColor": "oklch(72.0% 0.200 145.0 / 1)",
     "secondaryColor": "oklch(80.0% 0.185 55.0 / 1)",
-    "issued": false,
+    "issued": true,
     "completed": false
   },
   {
