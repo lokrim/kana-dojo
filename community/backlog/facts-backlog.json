@@ -549,12 +549,12 @@
     "id": 92,
     "fact": "Japan's National Apology Day falls on August 15th, when the nation reflects on World War II and its aftermath.",
     "issued": false,
-    "completed": false
+    "completed": true
   },
   {
     "id": 93,
     "fact": "The Japanese word 'tekito' (é©å½“) means both 'appropriate' and 'whatever/random' depending on context and tone.",
-    "issued": false,
+    "issued": true,
     "completed": false
   },
   {
