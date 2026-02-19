@@ -80,6 +80,7 @@ const baseThemeSets: BaseThemeGroup[] = [
     ],
   },
 
+  /*
   {
     name: 'Light',
     icon: Sun,
@@ -130,6 +131,7 @@ const baseThemeSets: BaseThemeGroup[] = [
       },
     ],
   },
+  */
   {
     name: 'Dark',
     icon: Moon,
@@ -1182,6 +1184,12 @@ const baseThemeSets: BaseThemeGroup[] = [
         // Selecting this theme enables random theme cycling on each question
         // Display name is "?" to signify mystery/chaos
         // NOTE: The theme button has a crazy gradient background applied in Themes.tsx
+        id: 'long',
+        backgroundColor: 'oklch(84.00% 0.055 6.93 / 1)',
+        mainColor: ' oklch(63.71% 0.1862 304.76 / 1)',
+        secondaryColor: 'oklch(66.54% 0.2210 304.03 / 1)',
+      },
+      {
         id: '?',
         backgroundColor: 'oklch(15.0% 0.045 280.0 / 1)', // dark base
         mainColor: 'oklch(95.0% 0.180 320.0 / 1)', // bright magenta-pink
