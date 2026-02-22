@@ -699,30 +699,30 @@
     "id": 117,
     "fact": "The Japanese word 'yabai' (やばい) originally meant 'dangerous' but now means anything extreme - amazing or terrible.",
     "issued": false,
-    "completed": false
+    "completed": true
   },
   {
     "id": 118,
     "fact": "Japan has 'cuddle therapy' clinics where you can pay to be held, spooned, or simply have physical human contact.",
     "issued": false,
-    "completed": false
+    "completed": true
   },
   {
     "id": 119,
     "fact": "There's a Japanese practice 'meshi' (召し) where a boss inviting you for a meal is essentially a command, not a request.",
     "issued": false,
-    "completed": false
+    "completed": true
   },
   {
     "id": 120,
     "fact": "Japan has more Michelin-starred restaurants than any other country - Tokyo alone has more stars than Paris.",
     "issued": false,
-    "completed": false
+    "completed": true
   },
   {
     "id": 121,
     "fact": "The concept of 'sumimasen' (すみません) combines 'sorry' and 'thank you' - acknowledging that someone went out of their way.",
-    "issued": false,
+    "issued": true,
     "completed": false
   },
   {
