@@ -1121,7 +1121,7 @@
     "romaji": "Nakittsura ni hachi",
     "english": "A bee on a crying face",
     "meaning": "Misfortune never comes alone",
-    "completed": false,
+    "completed": true,
     "issued": false
   },
   {
@@ -1130,7 +1130,7 @@
     "romaji": "Neko no te mo karitai",
     "english": "I'd even borrow a cat's paw",
     "meaning": "Extremely busy",
-    "completed": false,
+    "completed": true,
     "issued": false
   },
   {
@@ -1139,7 +1139,7 @@
     "romaji": "Hito no furi mite waga furi naose",
     "english": "Watch others and correct yourself",
     "meaning": "Learn from others' behavior",
-    "completed": false,
+    "completed": true,
     "issued": false
   },
   {
@@ -1148,7 +1148,7 @@
     "romaji": "Ki wo mite mori wo mizu",
     "english": "See the trees but not the forest",
     "meaning": "Missing the bigger picture",
-    "completed": false,
+    "completed": true,
     "issued": false
   },
   {
@@ -1157,7 +1157,7 @@
     "romaji": "Tabi wa michizure yo wa nasake",
     "english": "Travel needs companions; life needs kindness",
     "meaning": "Relationships and compassion matter",
-    "completed": false,
+    "completed": true,
     "issued": false
   },
   {
@@ -1166,7 +1166,7 @@
     "romaji": "Zenin zenka",
     "english": "Good causes bring good results",
     "meaning": "Good deeds lead to good outcomes",
-    "issued": false,
+    "issued": true,
     "completed": false
   },
   {
