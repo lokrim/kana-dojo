@@ -534,6 +534,12 @@
     "secondaryColor": "oklch(85.0% 0.155 90.0 / 1)"
   },
   {
+  "id": "spring-bamboo",
+  "backgroundColor": "oklch(93.0% 0.018 150.0 / 1)",
+  "mainColor": "oklch(55.0% 0.145 145.0 / 1)",
+  "secondaryColor": "oklch(70.0% 0.085 120.0 / 1)"
+},
+  {
     "id": "sundown-shrine",
     "backgroundColor": "oklch(18.0% 0.055 330.0 / 1)",
     "mainColor": "oklch(72.0% 0.195 35.0 / 1)",
