@@ -286,7 +286,7 @@
     "english": "Let's go!",
     "game": "Final Fantasy X",
     "character": "Tidus",
-    "issued": false,
+    "issued": true,
     "completed": false
   },
   {
