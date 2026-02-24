@@ -62,8 +62,9 @@ const AchievementNotification = ({
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={clsx(
             'relative w-80 cursor-pointer p-4',
-            'bg-(--card-color) border border-(--border-color)',
             cardBorderStyles,
+            'border border-solid border-(--border-color)',
+            'shadow-none',
             'transition-colors duration-200',
           )}
           onClick={handleViewDetails}
