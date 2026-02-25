@@ -135,7 +135,9 @@ export default function ClientLayout({
   // Track user visits for streak feature
   useVisitTracker();
 
-  // Global typing sound: play click when user types in any input element
+  // Global typing sound: play click when user types in any input element.
+  // playClick already respects the global silentMode setting via useAudioPreferences,
+  // so the effect re-registers automatically whenever that preference changes.
   const { playClick } = useClick();
   useEffect(() => {
     const IGNORED_KEYS = new Set([
