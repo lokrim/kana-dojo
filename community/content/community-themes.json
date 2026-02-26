@@ -575,10 +575,10 @@
   "mainColor": "oklch(80.0% 0.120 210.0 / 1)",
   "secondaryColor": "oklch(70.0% 0.085 195.0 / 1)"
   },
-      {
-              "id": "saffron-dusk",
-              "backgroundColor": "oklch(21.0% 0.040 55.0 / 1)",
-              "mainColor": "oklch(78.0% 0.160 60.0 / 1)",
-              "secondaryColor": "oklch(70.0% 0.095 40.0 / 1)"
-      }
+    {
+          "id": "festival-mask",
+          "backgroundColor": "oklch(20.0% 0.042 15.0 / 1)",
+          "mainColor": "oklch(80.0% 0.175 55.0 / 1)",
+          "secondaryColor": "oklch(72.0% 0.195 20.0 / 1)"
+    }
 ]
