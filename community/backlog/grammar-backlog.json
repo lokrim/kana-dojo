@@ -393,12 +393,12 @@
     "id": 66,
     "text": "\"〜に加えて\" means \"in addition to...\".",
     "issued": false,
-    "completed": false
+    "completed": true
   },
   {
     "id": 67,
     "text": "\"〜に向けて\" means \"toward / in preparation for\".",
-    "issued": false,
+    "issued": true,
     "completed": false
   },
   {
