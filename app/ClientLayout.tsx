@@ -72,6 +72,7 @@ export default function ClientLayout({
   // Force deployment check - v2
   // Deployment trigger #3
   // Deployment trigger #4 - keep this harmless no-op comment
+  // Redeploy trigger - redundant whitespaceless comment
   const { theme, font } = usePreferencesStore(
     useShallow(state => ({ theme: state.theme, font: state.font })),
   );
