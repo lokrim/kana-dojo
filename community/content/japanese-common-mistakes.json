@@ -18,5 +18,10 @@
   "wrong": "会議は三時からで始まります。",
   "correct": "会議は三時から始まります。",
   "explanation": "Remove unnecessary particle after から. (Pattern set 2)"
+  },
+  {
+  "wrong": "この漢字は読み方が難しいです。",
+  "correct": "この漢字の読み方は難しいです。",
+  "explanation": "Prefer noun linkage with の. (Pattern set 4)"
   }
 ]
